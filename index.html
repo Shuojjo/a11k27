@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chúc Mừng 8/3 💐</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose: #e8a0b0;
+    --blush: #f5d0dc;
+    --petal: #fde8ef;
+    --green: #a8c5a0;
+    --sage: #c8dbc2;
+    --cream: #fdf6f0;
+    --gold: #d4a96a;
+    --deep: #7d3f52;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Cormorant Garamond', serif;
+    background: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #petalCanvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── HOME SCREEN ─── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    z-index: 1;
+    background: radial-gradient(ellipse at 60% 40%, rgba(232,160,176,0.18) 0%, transparent 70%),
+                radial-gradient(ellipse at 20% 80%, rgba(168,197,160,0.15) 0%, transparent 60%);
+  }
+
+  .deco-flower {
+    position: absolute; font-size: 5rem; opacity: 0.08;
+    pointer-events: none; user-select: none;
+  }
+  .deco-flower:nth-child(1) { top:5%;left:3%;font-size:8rem;animation:floatSlow 8s ease-in-out infinite; }
+  .deco-flower:nth-child(2) { top:10%;right:5%;font-size:6rem;animation:floatSlow 10s ease-in-out infinite reverse; }
+  .deco-flower:nth-child(3) { bottom:15%;left:8%;font-size:7rem;animation:floatSlow 9s ease-in-out infinite 2s; }
+  .deco-flower:nth-child(4) { bottom:10%;right:3%;font-size:5rem;animation:floatSlow 7s ease-in-out infinite 1s; }
+
+  .date-badge {
+    font-family:'Playfair Display',serif; font-size:1rem;
+    letter-spacing:0.4em; color:var(--deep); text-transform:uppercase;
+    margin-bottom:20px; opacity:0; animation:fadeUp 1s ease forwards 0.3s;
+  }
+
+  .hero h1 {
+    font-family:'Playfair Display',serif; font-size:clamp(3rem,10vw,7rem);
+    color:var(--deep); line-height:1.1; font-weight:600;
+    opacity:0; animation:fadeUp 1s ease forwards 0.6s;
+  }
+  .hero h1 span { display:block; font-style:italic; font-weight:400; color:var(--rose); }
+
+  .hero-sub {
+    font-size:clamp(1.1rem,3vw,1.5rem); color:#6b3848;
+    margin-top:20px; font-style:italic; max-width:500px; line-height:1.8;
+    opacity:0; animation:fadeUp 1s ease forwards 0.9s;
+  }
+
+  .divider {
+    width:120px; height:1px;
+    background:linear-gradient(to right,transparent,var(--rose),transparent);
+    margin:30px auto; opacity:0; animation:fadeUp 1s ease forwards 1.1s;
+  }
+
+  .input-wrap {
+    margin-top:36px; width:100%; max-width:360px; position:relative;
+    opacity:0; animation:fadeUp 1s ease forwards 1.2s;
+  }
+
+  .name-input {
+    width:100%; padding:16px 20px; border:1.5px solid var(--blush);
+    border-radius:50px; background:rgba(255,255,255,0.85);
+    font-family:'Cormorant Garamond',serif; font-size:1.1rem; color:var(--deep);
+    outline:none; text-align:center; transition:border-color 0.3s,box-shadow 0.3s;
+    -webkit-appearance:none;
+  }
+  .name-input:focus { border-color:var(--rose); box-shadow:0 0 0 4px rgba(232,160,176,0.15); }
+  .name-input::placeholder { color:#c8a0b0; font-style:italic; }
+
+  .autocomplete-list {
+    position:absolute; top:calc(100% + 8px); left:0; right:0;
+    background:white; border-radius:16px;
+    box-shadow:0 8px 32px rgba(125,63,82,0.15);
+    overflow:hidden; z-index:100; max-height:220px; overflow-y:auto;
+  }
+
+  .autocomplete-item {
+    padding:13px 20px; font-size:1rem; color:var(--deep); cursor:pointer;
+    transition:background 0.2s; display:flex; align-items:center; gap:10px;
+    border-bottom:1px solid #fde8ef;
+  }
+  .autocomplete-item:last-child { border-bottom:none; }
+  .autocomplete-item:hover,.autocomplete-item.active { background:var(--petal); }
+
+  .btn-wish {
+    margin-top:14px; width:100%; padding:15px; border:none; border-radius:50px;
+    background:linear-gradient(135deg,var(--rose),#d4749a); color:white;
+    font-family:'Playfair Display',serif; font-size:1.05rem; font-style:italic;
+    letter-spacing:0.05em; cursor:pointer; transition:transform 0.2s,box-shadow 0.2s;
+    box-shadow:0 4px 16px rgba(212,116,154,0.3);
+  }
+  .btn-wish:active { transform:scale(0.97); }
+
+  /* ─── WISH SCREEN (cinematic scroll) ─── */
+  .wish-screen {
+    display:none;
+    position:fixed; inset:0; z-index:50;
+    overflow-y:auto; overflow-x:hidden;
+    scroll-snap-type:y mandatory;
+    -webkit-overflow-scrolling:touch;
+  }
+  .wish-screen.show { display:block; animation:fadeIn 0.5s ease forwards; }
+
+  /* Section 1 — TÊN */
+  .ws-name-sec {
+    height:100dvh; min-height:100vh;
+    scroll-snap-align:start;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    text-align:center; padding:40px 28px;
+    position:relative;
+    background:linear-gradient(160deg,#fff5f8 0%,#fde8ef 60%,#f5f0ff 100%);
+  }
+
+  .ws-flower-big {
+    font-size:4rem; margin-bottom:16px; opacity:0;
+    animation:popIn 0.5s cubic-bezier(.34,1.56,.64,1) forwards 0.3s;
+  }
+  .ws-to {
+    font-family:'Playfair Display',serif; font-size:0.95rem;
+    letter-spacing:0.35em; color:var(--deep); text-transform:uppercase;
+    margin-bottom:10px; opacity:0; animation:fadeUp 0.6s ease forwards 0.5s;
+  }
+  .ws-name {
+    font-family:'Playfair Display',serif; font-size:clamp(2.2rem,10vw,4rem);
+    color:var(--deep); font-weight:600; line-height:1.15;
+    opacity:0; animation:fadeUp 0.6s ease forwards 0.65s;
+  }
+  .ws-scroll-hint {
+    margin-top:48px; font-size:0.8rem; letter-spacing:0.2em; color:#b07080;
+    opacity:0; animation:fadeUp 0.5s ease forwards 1.1s;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .ws-scroll-hint .arr {
+    width:26px; height:26px;
+    border-right:2px solid var(--rose); border-bottom:2px solid var(--rose);
+    transform:rotate(45deg); animation:bounceDown 1.2s ease-in-out infinite;
+  }
+
+  /* Corner SVG shared */
+  .c-corner {
+    position:absolute; pointer-events:none; width:120px; height:120px; opacity:0;
+  }
+  .c-corner svg { width:100%; height:100%; }
+  .c-tl { top:0;left:0;     animation:cIn-tl 0.7s cubic-bezier(.34,1.4,.64,1) forwards 0.2s; }
+  .c-tr { top:0;right:0;    animation:cIn-tr 0.7s cubic-bezier(.34,1.4,.64,1) forwards 0.3s; transform:scaleX(-1); }
+  .c-bl { bottom:0;left:0;  animation:cIn-bl 0.7s cubic-bezier(.34,1.4,.64,1) forwards 0.4s; transform:scaleY(-1); }
+  .c-br { bottom:0;right:0; animation:cIn-br 0.7s cubic-bezier(.34,1.4,.64,1) forwards 0.5s; transform:scale(-1,-1); }
+
+  @keyframes cIn-tl { from{opacity:0;transform:translate(-20px,-20px) scale(0.6)} to{opacity:1;transform:translate(0,0) scale(1)} }
+  @keyframes cIn-tr { from{opacity:0;transform:translate(20px,-20px) scaleX(-1) scale(0.6)} to{opacity:1;transform:translate(0,0) scaleX(-1)} }
+  @keyframes cIn-bl { from{opacity:0;transform:translate(-20px,20px) scaleY(-1) scale(0.6)} to{opacity:1;transform:translate(0,0) scaleY(-1)} }
+  @keyframes cIn-br { from{opacity:0;transform:translate(20px,20px) scale(-1,-1) scale(0.6)} to{opacity:1;transform:translate(0,0) scale(-1,-1)} }
+
+  .c-emoji {
+    position:absolute; font-size:1.6rem; pointer-events:none; opacity:0;
+  }
+  .c-emoji.e1 { top:100px;left:100px;  animation:eAppear 0.5s ease forwards 0.8s, eFloat 3s ease-in-out infinite 0.8s; }
+  .c-emoji.e2 { top:100px;right:100px; animation:eAppear 0.5s ease forwards 0.95s,eFloat 3s ease-in-out infinite 1s; }
+  .c-emoji.e3 { bottom:100px;left:100px;  animation:eAppear 0.5s ease forwards 1.1s, eFloat 3s ease-in-out infinite 1.2s; }
+  .c-emoji.e4 { bottom:100px;right:100px; animation:eAppear 0.5s ease forwards 1.25s,eFloat 3s ease-in-out infinite 1.4s; }
+  @keyframes eAppear { from{opacity:0;transform:scale(0)} to{opacity:1;transform:scale(1)} }
+  @keyframes eFloat  { 0%,100%{transform:translateY(0) rotate(-8deg)} 50%{transform:translateY(-8px) rotate(8deg)} }
+
+  /* Section 2 — ẢNH (Polaroid) */
+  .ws-photo-sec {
+    height:100dvh; min-height:100vh;
+    scroll-snap-align:start;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+    background: linear-gradient(145deg, #fef0f5 0%, #fde8d8 35%, #f0eef8 70%, #e8f4f0 100%);
+  }
+  .ws-photo-bg {
+    position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 30%, rgba(232,160,176,0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 70%, rgba(168,197,160,0.18) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 40% at 60% 20%, rgba(212,186,255,0.15) 0%, transparent 50%);
+  }
+
+  /* confetti dots nền */
+  .confetti-dot {
+    position:absolute; border-radius:50%; pointer-events:none;
+    animation:dotFloat var(--df,8s) ease-in-out infinite var(--dfe,0s);
+    opacity:0.35;
+  }
+  @keyframes dotFloat {
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    50%    { transform:translateY(-12px) rotate(180deg); }
+  }
+
+  /* Khung Polaroid */
+  .polaroid-wrap {
+    position:relative; z-index:2;
+    opacity:0; animation:polaroidDrop 0.7s cubic-bezier(.34,1.4,.64,1) forwards 0.2s;
+  }
+  @keyframes polaroidDrop {
+    from { opacity:0; transform:translateY(-40px) rotate(-8deg) scale(0.85); }
+    to   { opacity:1; transform:translateY(0) rotate(-4deg) scale(1); }
+  }
+
+  .polaroid {
+    background:white;
+    padding: 14px 14px 52px 14px;
+    box-shadow: 0 8px 32px rgba(125,63,82,0.18), 0 2px 8px rgba(125,63,82,0.1);
+    border-radius: 3px;
+    width: min(72vw, 270px);
+  }
+
+  .ws-photo-frame {
+    width:100%; aspect-ratio:1;
+    overflow:hidden; border-radius:2px;
+    border: none; box-shadow: none;
+    opacity:1; animation:none;
+  }
+  .ws-photo-frame img { width:100%; height:100%; object-fit:cover; display:block; }
+
+  .polaroid-label {
+    margin-top:12px;
+    font-family:'Playfair Display',serif;
+    font-size:clamp(0.95rem,3.5vw,1.2rem);
+    color:#7d3f52; font-style:italic;
+    text-align:center; letter-spacing:0.05em;
+  }
+
+  .ws-photo-name {
+    display:none; /* tên hiện trong polaroid-label thay vì ở ngoài */
+  }
+
+  /* sticker dán góc polaroid */
+  .sticker {
+    position:absolute; font-size:1.6rem; pointer-events:none;
+    animation:stickerPop 0.4s cubic-bezier(.34,1.6,.64,1) forwards, stickerWiggle 3s ease-in-out infinite;
+    opacity:0;
+  }
+  .sticker.s1 { top:-18px; right:-18px; animation-delay:0.6s, 0.6s; transform-origin:center; }
+  .sticker.s2 { bottom:-16px; left:-16px; animation-delay:0.75s, 0.75s; transform-origin:center; }
+  @keyframes stickerPop    { from{opacity:0;transform:scale(0) rotate(-20deg)} to{opacity:1;transform:scale(1) rotate(12deg)} }
+  @keyframes stickerWiggle { 0%,100%{transform:scale(1) rotate(12deg)} 50%{transform:scale(1.15) rotate(16deg)} }
+
+  .ws-photo-hint {
+    position:relative; z-index:2; margin-top:36px;
+    font-size:0.78rem; letter-spacing:0.2em; color:#b07080;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    opacity:0; animation:fadeUp 0.5s ease forwards 0.9s;
+  }
+  .ws-photo-hint .arr {
+    width:22px; height:22px;
+    border-right:1.5px solid var(--rose); border-bottom:1.5px solid var(--rose);
+    transform:rotate(45deg); animation:bounceDown 1.2s ease-in-out infinite;
+  }
+
+  /* Section 3 — LỜI CHÚC */
+  .ws-wish-sec {
+    min-height:100dvh;
+    scroll-snap-align:start;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:70px 32px 60px;
+    text-align:center; position:relative;
+    background:linear-gradient(160deg,#f0f8ee 0%,#fde8ef 50%,#fff5f8 100%);
+  }
+  .ws-wish-sec .c-corner { opacity:0.65; animation:none; }
+  .ws-wish-sec .c-tl { opacity:0.65; }
+  .ws-wish-sec .c-tr { opacity:0.65; }
+  .ws-wish-sec .c-bl { opacity:0.65; }
+  .ws-wish-sec .c-br { opacity:0.65; }
+
+  .ws-wish-icon  { font-size:2.5rem; margin-bottom:20px; }
+  .ws-wish-divider {
+    width:80px; height:1px;
+    background:linear-gradient(to right,transparent,var(--rose),transparent);
+    margin:0 auto 28px;
+  }
+  .ws-wish-text {
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(1.2rem,4.5vw,1.6rem);
+    color:#5a3040; line-height:2; font-style:italic; max-width:360px;
+  }
+  .ws-wish-date {
+    margin-top:32px; font-size:1rem; letter-spacing:0.2em;
+    color:var(--deep); font-family:'Playfair Display',serif;
+  }
+  .btn-back {
+    margin-top:40px; padding:13px 36px;
+    border:1.5px solid var(--rose); border-radius:50px;
+    background:transparent; color:var(--deep);
+    font-family:'Cormorant Garamond',serif; font-size:1rem;
+    cursor:pointer; letter-spacing:0.1em;
+    transition:background 0.2s;
+  }
+  .btn-back:hover { background:var(--blush); }
+
+  /* TOUCH PARTICLES */
+  .touch-particle { position:fixed; pointer-events:none; z-index:9999; will-change:transform,opacity; }
+  .touch-particle.emoji { font-size:1.4rem; animation:particleFly var(--dur,0.9s) ease forwards; }
+  .touch-particle.star  { width:var(--sz,8px);height:var(--sz,8px);border-radius:50%;background:var(--col,#f5d0dc);animation:starFly var(--dur,0.7s) ease forwards; }
+  .touch-ripple { position:fixed;pointer-events:none;z-index:9998;border-radius:50%;border:2px solid rgba(232,160,176,0.6);transform:scale(0);animation:rippleOut 0.6s ease forwards; }
+
+  @keyframes particleFly {
+    0%  {opacity:1;transform:translate(0,0) scale(0.4) rotate(0deg)}
+    40% {opacity:1;transform:translate(var(--tx),var(--ty1)) scale(1.2) rotate(var(--rot))}
+    100%{opacity:0;transform:translate(var(--tx2),var(--ty2)) scale(0.5) rotate(var(--rot2))}
+  }
+  @keyframes starFly {
+    0%  {opacity:1;transform:translate(0,0) scale(0)}
+    30% {opacity:1;transform:translate(var(--tx),var(--ty1)) scale(1)}
+    100%{opacity:0;transform:translate(var(--tx2),var(--ty2)) scale(0)}
+  }
+  @keyframes rippleOut {
+    0%  {opacity:0.7;transform:scale(0);width:0;height:0;margin:0}
+    100%{opacity:0;transform:scale(1);width:80px;height:80px;margin:-40px 0 0 -40px}
+  }
+
+  /* SHARED KEYFRAMES */
+  @keyframes fadeUp  { from{opacity:0;transform:translateY(25px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+  @keyframes popIn   { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+  @keyframes floatSlow { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-20px) rotate(5deg)} }
+  @keyframes bounceDown { 0%,100%{transform:rotate(45deg) translateY(0);opacity:0.5} 50%{transform:rotate(45deg) translateY(6px);opacity:1} }
+  @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+  @keyframes cardIn { to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<canvas id="petalCanvas"></canvas>
+
+<!-- HOME SCREEN -->
+<section class="hero" id="homeScreen">
+  <div class="deco-flower">🌸</div>
+  <div class="deco-flower">🌺</div>
+  <div class="deco-flower">🌷</div>
+  <div class="deco-flower">💐</div>
+  <p class="date-badge">✦ 8 tháng 3 ✦</p>
+  <h1>Chúc Mừng<span>Ngày Phụ Nữ</span></h1>
+  <div class="divider"></div>
+  <p class="hero-sub">Nhập tên của bạn để nhận lời chúc riêng 🌹</p>
+  <div class="input-wrap">
+    <input class="name-input" id="nameInput" type="text" placeholder="Tên của bạn là...?" autocomplete="off"/>
+    <div class="autocomplete-list" id="autocompleteList" style="display:none"></div>
+    <button class="btn-wish" id="btnWish">Xem lời chúc của tôi 🌸</button>
+  </div>
+</section>
+
+<!-- WISH SCREEN -->
+<div class="wish-screen" id="wishScreen">
+
+  <!-- SECTION 1: TÊN -->
+  <div class="ws-name-sec">
+    <!-- corners -->
+    <div class="c-corner c-tl" id="nc-tl"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110 Q30 70 60 50" stroke="#c8dbc2" stroke-width="2" stroke-linecap="round"/><path d="M10 110 Q20 60 10 30" stroke="#c8dbc2" stroke-width="1.5" stroke-linecap="round"/><path d="M30 80 Q45 65 55 75 Q40 85 30 80Z" fill="#a8c5a0" opacity="0.7"/><path d="M15 55 Q28 38 38 50 Q25 62 15 55Z" fill="#b8d4b0" opacity="0.6"/><circle cx="60" cy="48" r="5" fill="#f5d0dc"/><ellipse cx="60" cy="40" rx="4" ry="7" fill="#e8a0b0" opacity="0.85"/><ellipse cx="67" cy="44" rx="4" ry="7" fill="#e8a0b0" opacity="0.85" transform="rotate(60 67 44)"/><ellipse cx="65" cy="53" rx="4" ry="7" fill="#e8a0b0" opacity="0.75" transform="rotate(120 65 53)"/><ellipse cx="55" cy="53" rx="4" ry="7" fill="#f5c0cc" opacity="0.75" transform="rotate(-120 55 53)"/><ellipse cx="53" cy="44" rx="4" ry="7" fill="#f5c0cc" opacity="0.85" transform="rotate(-60 53 44)"/><circle cx="60" cy="48" r="4" fill="#fff0a0" opacity="0.9"/><circle cx="22" cy="30" r="3" fill="#fde8ef"/><ellipse cx="22" cy="24" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7"/><ellipse cx="27" cy="27" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7" transform="rotate(60 27 27)"/><ellipse cx="27" cy="33" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(120 27 33)"/><ellipse cx="22" cy="36" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(180 22 36)"/><ellipse cx="17" cy="33" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(-120 17 33)"/><ellipse cx="17" cy="27" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7" transform="rotate(-60 17 27)"/><circle cx="22" cy="30" r="2.5" fill="#fff0a0" opacity="0.9"/></svg></div>
+    <div class="c-corner c-tr"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110 Q30 70 60 50" stroke="#c8dbc2" stroke-width="2" stroke-linecap="round"/><path d="M10 110 Q20 60 10 30" stroke="#c8dbc2" stroke-width="1.5" stroke-linecap="round"/><path d="M30 80 Q45 65 55 75 Q40 85 30 80Z" fill="#a8c5a0" opacity="0.7"/><path d="M15 55 Q28 38 38 50 Q25 62 15 55Z" fill="#b8d4b0" opacity="0.6"/><circle cx="60" cy="48" r="5" fill="#f5d0dc"/><ellipse cx="60" cy="40" rx="4" ry="7" fill="#e8a0b0" opacity="0.85"/><ellipse cx="67" cy="44" rx="4" ry="7" fill="#e8a0b0" opacity="0.85" transform="rotate(60 67 44)"/><ellipse cx="65" cy="53" rx="4" ry="7" fill="#e8a0b0" opacity="0.75" transform="rotate(120 65 53)"/><ellipse cx="55" cy="53" rx="4" ry="7" fill="#f5c0cc" opacity="0.75" transform="rotate(-120 55 53)"/><ellipse cx="53" cy="44" rx="4" ry="7" fill="#f5c0cc" opacity="0.85" transform="rotate(-60 53 44)"/><circle cx="60" cy="48" r="4" fill="#fff0a0" opacity="0.9"/><circle cx="22" cy="30" r="3" fill="#fde8ef"/><ellipse cx="22" cy="24" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7"/><ellipse cx="27" cy="27" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7" transform="rotate(60 27 27)"/><ellipse cx="27" cy="33" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(120 27 33)"/><ellipse cx="22" cy="36" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(180 22 36)"/><ellipse cx="17" cy="33" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(-120 17 33)"/><ellipse cx="17" cy="27" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7" transform="rotate(-60 17 27)"/><circle cx="22" cy="30" r="2.5" fill="#fff0a0" opacity="0.9"/></svg></div>
+    <div class="c-corner c-bl"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110 Q30 70 60 50" stroke="#c8dbc2" stroke-width="2" stroke-linecap="round"/><path d="M10 110 Q20 60 10 30" stroke="#c8dbc2" stroke-width="1.5" stroke-linecap="round"/><path d="M30 80 Q45 65 55 75 Q40 85 30 80Z" fill="#a8c5a0" opacity="0.7"/><path d="M15 55 Q28 38 38 50 Q25 62 15 55Z" fill="#b8d4b0" opacity="0.6"/><circle cx="60" cy="48" r="5" fill="#f5d0dc"/><ellipse cx="60" cy="40" rx="4" ry="7" fill="#e8a0b0" opacity="0.85"/><ellipse cx="67" cy="44" rx="4" ry="7" fill="#e8a0b0" opacity="0.85" transform="rotate(60 67 44)"/><ellipse cx="65" cy="53" rx="4" ry="7" fill="#e8a0b0" opacity="0.75" transform="rotate(120 65 53)"/><ellipse cx="55" cy="53" rx="4" ry="7" fill="#f5c0cc" opacity="0.75" transform="rotate(-120 55 53)"/><ellipse cx="53" cy="44" rx="4" ry="7" fill="#f5c0cc" opacity="0.85" transform="rotate(-60 53 44)"/><circle cx="60" cy="48" r="4" fill="#fff0a0" opacity="0.9"/><circle cx="22" cy="30" r="3" fill="#fde8ef"/><ellipse cx="22" cy="24" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7"/><ellipse cx="27" cy="27" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7" transform="rotate(60 27 27)"/><ellipse cx="27" cy="33" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(120 27 33)"/><ellipse cx="22" cy="36" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(180 22 36)"/><ellipse cx="17" cy="33" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(-120 17 33)"/><ellipse cx="17" cy="27" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7" transform="rotate(-60 17 27)"/><circle cx="22" cy="30" r="2.5" fill="#fff0a0" opacity="0.9"/></svg></div>
+    <div class="c-corner c-br"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110 Q30 70 60 50" stroke="#c8dbc2" stroke-width="2" stroke-linecap="round"/><path d="M10 110 Q20 60 10 30" stroke="#c8dbc2" stroke-width="1.5" stroke-linecap="round"/><path d="M30 80 Q45 65 55 75 Q40 85 30 80Z" fill="#a8c5a0" opacity="0.7"/><path d="M15 55 Q28 38 38 50 Q25 62 15 55Z" fill="#b8d4b0" opacity="0.6"/><circle cx="60" cy="48" r="5" fill="#f5d0dc"/><ellipse cx="60" cy="40" rx="4" ry="7" fill="#e8a0b0" opacity="0.85"/><ellipse cx="67" cy="44" rx="4" ry="7" fill="#e8a0b0" opacity="0.85" transform="rotate(60 67 44)"/><ellipse cx="65" cy="53" rx="4" ry="7" fill="#e8a0b0" opacity="0.75" transform="rotate(120 65 53)"/><ellipse cx="55" cy="53" rx="4" ry="7" fill="#f5c0cc" opacity="0.75" transform="rotate(-120 55 53)"/><ellipse cx="53" cy="44" rx="4" ry="7" fill="#f5c0cc" opacity="0.85" transform="rotate(-60 53 44)"/><circle cx="60" cy="48" r="4" fill="#fff0a0" opacity="0.9"/><circle cx="22" cy="30" r="3" fill="#fde8ef"/><ellipse cx="22" cy="24" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7"/><ellipse cx="27" cy="27" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7" transform="rotate(60 27 27)"/><ellipse cx="27" cy="33" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(120 27 33)"/><ellipse cx="22" cy="36" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(180 22 36)"/><ellipse cx="17" cy="33" rx="2.5" ry="5" fill="#f5c0cc" opacity="0.65" transform="rotate(-120 17 33)"/><ellipse cx="17" cy="27" rx="2.5" ry="5" fill="#e8a0b0" opacity="0.7" transform="rotate(-60 17 27)"/><circle cx="22" cy="30" r="2.5" fill="#fff0a0" opacity="0.9"/></svg></div>
+    <span class="c-emoji e1" id="cE1">🌸</span>
+    <span class="c-emoji e2" id="cE2">🌷</span>
+    <span class="c-emoji e3" id="cE3">🍃</span>
+    <span class="c-emoji e4" id="cE4">✨</span>
+
+    <div class="ws-flower-big" id="wsFlower">🌸</div>
+    <p class="ws-to">✦ Gửi đến ✦</p>
+    <h2 class="ws-name" id="wsName"></h2>
+    <div class="ws-scroll-hint">
+      <span>Cuộn xuống</span>
+      <div class="arr"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: ẢNH (Polaroid) -->
+  <div class="ws-photo-sec" id="wsPhotoSec">
+    <div class="ws-photo-bg"></div>
+    <!-- confetti dots nền -->
+    <div class="confetti-dot" style="width:8px;height:8px;background:#f5c0d0;top:15%;left:12%;--df:7s;--dfe:0s"></div>
+    <div class="confetti-dot" style="width:6px;height:6px;background:#c8dbc2;top:25%;right:14%;--df:5s;--dfe:1s"></div>
+    <div class="confetti-dot" style="width:10px;height:10px;background:#f5d0a0;top:70%;left:8%;--df:9s;--dfe:0.5s"></div>
+    <div class="confetti-dot" style="width:7px;height:7px;background:#d0c0f5;top:60%;right:10%;--df:6s;--dfe:1.5s"></div>
+    <div class="confetti-dot" style="width:5px;height:5px;background:#f5c0d0;top:85%;left:55%;--df:8s;--dfe:2s"></div>
+    <div class="confetti-dot" style="width:9px;height:9px;background:#a0d8c0;top:40%;left:5%;--df:7.5s;--dfe:0.8s"></div>
+    <div class="confetti-dot" style="width:6px;height:6px;background:#f5b0c0;top:20%;right:6%;--df:6.5s;--dfe:2.5s"></div>
+
+    <!-- Khung Polaroid -->
+    <div class="polaroid-wrap">
+      <div class="sticker s1" id="wsSticker1">🌸</div>
+      <div class="sticker s2" id="wsSticker2">✨</div>
+      <div class="polaroid">
+        <div class="ws-photo-frame">
+          <img id="wsPhoto" src="" alt=""/>
+        </div>
+        <p class="polaroid-label" id="wsPhotoName"></p>
+      </div>
+    </div>
+
+    <p class="ws-photo-name"></p>
+    <div class="ws-photo-hint">
+      <span>Cuộn xuống để xem lời chúc</span>
+      <div class="arr"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: LỜI CHÚC -->
+  <div class="ws-wish-sec">
+    <div class="c-corner c-tl" style="opacity:0.6;animation:none"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110 Q30 70 60 50" stroke="#c8dbc2" stroke-width="2" stroke-linecap="round"/><path d="M10 110 Q20 60 10 30" stroke="#c8dbc2" stroke-width="1.5" stroke-linecap="round"/><path d="M30 80 Q45 65 55 75 Q40 85 30 80Z" fill="#a8c5a0" opacity="0.7"/><path d="M15 55 Q28 38 38 50 Q25 62 15 55Z" fill="#b8d4b0" opacity="0.6"/><circle cx="60" cy="48" r="5" fill="#f5d0dc"/><ellipse cx="60" cy="40" rx="4" ry="7" fill="#e8a0b0" opacity="0.85"/><ellipse cx="67" cy="44" rx="4" ry="7" fill="#e8a0b0" opacity="0.85" transform="rotate(60 67 44)"/><circle cx="60" cy="48" r="4" fill="#fff0a0" opacity="0.9"/></svg></div>
+    <div class="c-corner c-tr" style="opacity:0.6;animation:none"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110 Q30 70 60 50" stroke="#c8dbc2" stroke-width="2" stroke-linecap="round"/><path d="M10 110 Q20 60 10 30" stroke="#c8dbc2" stroke-width="1.5" stroke-linecap="round"/><path d="M30 80 Q45 65 55 75 Q40 85 30 80Z" fill="#a8c5a0" opacity="0.7"/><path d="M15 55 Q28 38 38 50 Q25 62 15 55Z" fill="#b8d4b0" opacity="0.6"/><circle cx="60" cy="48" r="5" fill="#f5d0dc"/><ellipse cx="60" cy="40" rx="4" ry="7" fill="#e8a0b0" opacity="0.85"/><ellipse cx="67" cy="44" rx="4" ry="7" fill="#e8a0b0" opacity="0.85" transform="rotate(60 67 44)"/><circle cx="60" cy="48" r="4" fill="#fff0a0" opacity="0.9"/></svg></div>
+    <div class="c-corner c-bl" style="opacity:0.6;animation:none"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110 Q30 70 60 50" stroke="#c8dbc2" stroke-width="2" stroke-linecap="round"/><path d="M10 110 Q20 60 10 30" stroke="#c8dbc2" stroke-width="1.5" stroke-linecap="round"/><path d="M30 80 Q45 65 55 75 Q40 85 30 80Z" fill="#a8c5a0" opacity="0.7"/><circle cx="60" cy="48" r="5" fill="#f5d0dc"/><ellipse cx="60" cy="40" rx="4" ry="7" fill="#e8a0b0" opacity="0.85"/><circle cx="60" cy="48" r="4" fill="#fff0a0" opacity="0.9"/></svg></div>
+    <div class="c-corner c-br" style="opacity:0.6;animation:none"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110 Q30 70 60 50" stroke="#c8dbc2" stroke-width="2" stroke-linecap="round"/><path d="M10 110 Q20 60 10 30" stroke="#c8dbc2" stroke-width="1.5" stroke-linecap="round"/><path d="M30 80 Q45 65 55 75 Q40 85 30 80Z" fill="#a8c5a0" opacity="0.7"/><circle cx="60" cy="48" r="5" fill="#f5d0dc"/><ellipse cx="60" cy="40" rx="4" ry="7" fill="#e8a0b0" opacity="0.85"/><circle cx="60" cy="48" r="4" fill="#fff0a0" opacity="0.9"/></svg></div>
+
+    <div class="ws-wish-icon" id="wsWishIcon">💖</div>
+    <div class="ws-wish-divider"></div>
+    <p class="ws-wish-text" id="wsWishText"></p>
+    <p class="ws-wish-date">🌸 Chúc mừng ngày 8 tháng 3 🌸</p>
+    <button class="btn-back" id="btnBack">← Quay lại</button>
+  </div>
+
+</div><!-- end wish-screen -->
+
+<script>
+const girls = [
+  { name:"Vũ Châu An",             wish:"Chúc bạn luôn dịu dàng và tỏa sáng như ánh ban mai, mỗi ngày đều ngập tràn niềm vui!", photo:"" },
+  { name:"Đỗ Thị Mai Anh",         wish:"Chúc bạn xinh tươi như hoa mùa xuân, luôn được yêu thương và nở nụ cười thật rạng rỡ!", photo:"" },
+  { name:"Nguyễn Bảo Anh",         wish:"Chúc bạn mãi là viên ngọc quý, cuộc sống luôn đong đầy những điều tốt đẹp nhất!", photo:"" },
+  { name:"Nguyễn Ngọc Phương Anh", wish:"Chúc bạn tràn đầy năng lượng, tự tin chinh phục mọi ước mơ và hành trình phía trước!", photo:"" },
+  { name:"Nguyễn Vân Anh",         wish:"Chúc bạn nhẹ nhàng như làn gió mát, mang đến niềm vui cho tất cả những người xung quanh!", photo:"" },
+  { name:"Phạm Minh Anh",          wish:"Chúc bạn luôn rực rỡ, ngày 8/3 thật ý nghĩa và đặc biệt bên những người thân yêu!", photo:"" },
+  { name:"Hoàng Minh Châu",        wish:"Chúc bạn xinh đẹp, tài năng và luôn tỏa ra năng lượng tích cực đến mọi người!", photo:"" },
+  { name:"Lê Thị Minh Châu",       wish:"Chúc bạn một ngày 8/3 ngập tràn hoa và yêu thương, mãi giữ nụ cười tươi thắm!", photo:"" },
+  { name:"Phạm Thị Phương Dung",   wish:"Chúc bạn luôn vui vẻ, hạnh phúc và tiếp tục tỏa sáng theo cách riêng của mình!", photo:"" },
+  { name:"Tạ Thị Thu Hằng",        wish:"Chúc bạn sức khỏe dồi dào, mọi điều ước đều thành sự thật trong năm nay!", photo:"" },
+  { name:"Đỗ Thúy Hiền",           wish:"Chúc bạn luôn dịu hiền như tên gọi, được sống trong những ngày thật đẹp và bình an!", photo:"" },
+  { name:"Nguyễn Thu Huyền",       wish:"Chúc bạn luôn là ánh sáng dịu dàng, mang lại ấm áp cho tất cả những ai may mắn quen biết bạn!", photo:"" },
+  { name:"Triệu Thị Thu Huyền",    wish:"Chúc bạn một ngày 8/3 thật ngọt ngào, đong đầy những khoảnh khắc đáng nhớ!", photo:"" },
+  { name:"Lê Mai Hương",           wish:"Chúc bạn thơm ngát như hoa, mỗi ngày đi qua đều để lại dấu ấn tươi đẹp!", photo:"" },
+  { name:"Hoàng Khánh Linh",       wish:"Chúc bạn luôn lanh lợi, tự tin và bước đến mọi thành công với nụ cười rạng rỡ!", photo:"" },
+  { name:"Nguyễn Lê Phương Linh",  wish:"Chúc bạn ngày càng xinh đẹp, tài giỏi và luôn được bao quanh bởi yêu thương!", photo:"" },
+  { name:"Nguyễn Thảo Linh",       wish:"Chúc bạn nhẹ nhàng, thảnh thơi như làn gió xuân — mang niềm vui đến khắp nơi!", photo:"" },
+  { name:"Phạm Khánh Linh",        wish:"Chúc bạn luôn tràn đầy hy vọng, mỗi bình minh là một trang mới tuyệt vời!", photo:"" },
+  { name:"Phùng Khánh Linh",       wish:"Chúc bạn một mùa xuân rực rỡ, cuộc sống ngập tràn niềm vui và những điều bất ngờ dễ thương!", photo:"" },
+  { name:"Nguyễn Diệu Minh",       wish:"Chúc bạn luôn tỏa sáng diệu kỳ, là nguồn cảm hứng và niềm tự hào của cả lớp!", photo:"" },
+  { name:"Tạ Vũ Kim Ngân",         wish:"Chúc bạn quý giá như ánh kim, luôn được trân trọng và yêu thương mỗi ngày!", photo:"" },
+  { name:"Đỗ Lê Minh Ngọc",        wish:"Chúc bạn trong sáng như ngọc, luôn giữ được nụ cười ngọt ngào và tâm hồn thuần khiết!", photo:"" },
+  { name:"Hoàng Oanh",             wish:"Chúc bạn ca vang niềm vui, cuộc sống luôn đong đầy âm nhạc và những khoảnh khắc hạnh phúc!", photo:"" },
+  { name:"Quảng Hồng Quyên",       wish:"Chúc bạn rực hồng như tên gọi, mãi mãi tươi trẻ, yêu đời và đáng yêu!", photo:"" },
+  { name:"Tạ Thị Hương Thảo",      wish:"Chúc bạn thơm ngát như hoa thảo, bước đi đến đâu cũng mang theo hương thơm dịu dàng!", photo:"" },
+  { name:"Hà Minh Trang",          wish:"Chúc bạn luôn đẹp rạng ngời, là trang sách đẹp nhất trong câu chuyện cuộc đời mình!", photo:"" },
+  { name:"Ngô Việt Minh Trang",    wish:"Chúc bạn một ngày 8/3 đầy ắp yêu thương, nụ cười và những bó hoa xinh nhất!", photo:"" },
+  { name:"Trần Phan Trinh",         wish:"Chúc bạn luôn trẻ trung, năng động và tỏa sáng theo phong cách riêng không ai sánh được!", photo:"" },
+];
+
+// Placeholder gradient avatars (sẽ thay bằng ảnh thật sau)
+const placeholderColors = [
+  ['#f5c0d0','#e8a0b0'],['#fde8a0','#f5c070'],['#c0d8f5','#90b8e8'],
+  ['#d0f5c0','#a0e890'],['#f5c0f5','#e890e8'],['#f5d8c0','#e8b890'],
+  ['#c0f5f5','#90e8e8'],['#f5c0c0','#e89090'],['#d8c0f5','#b890e8'],
+  ['#c0f5d8','#90e8b8'],['#f5f0c0','#e8e090'],['#c0c8f5','#90a0e8'],
+];
+
+const flowers   = ["🌸","🌺","🌷","💐","🌼","🌹","🪷","🌻"];
+const wishIcons = ["💖","💕","🌹","💗","✨","🌸","💝","🌷"];
+const emojiSets = [
+  ["🌸","🌷","🍃","✨"],["🌺","💖","🌿","💫"],
+  ["🌹","💕","🍀","⭐"],["🪷","💗","🌾","🦋"],
+];
+
+const GENERAL_WISH = "Chúc bạn một ngày 8/3 thật vui tươi, ngập tràn yêu thương và hạnh phúc! 🌸";
+
+const nameInput  = document.getElementById('nameInput');
+const autoList   = document.getElementById('autocompleteList');
+const wishScreen = document.getElementById('wishScreen');
+const wsFlower   = document.getElementById('wsFlower');
+const wsName     = document.getElementById('wsName');
+const wsPhoto    = document.getElementById('wsPhoto');
+const wsPhotoName= document.getElementById('wsPhotoName');
+const wsWishText = document.getElementById('wsWishText');
+const wsWishIcon = document.getElementById('wsWishIcon');
+
+function normalize(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d');
+}
+
+function showDropdown(q) {
+  const nq = normalize(q);
+  if (!nq) { autoList.style.display='none'; return; }
+  const hits = girls.filter(g => normalize(g.name).includes(nq)).slice(0,6);
+  if (!hits.length) { autoList.style.display='none'; return; }
+  autoList.innerHTML = hits.map((g,i) =>
+    `<div class="autocomplete-item" data-name="${g.name}">
+      <span>${flowers[i%flowers.length]}</span><span>${g.name}</span>
+    </div>`).join('');
+  autoList.style.display='block';
+  autoList.querySelectorAll('.autocomplete-item').forEach(item => {
+    const pick = () => { nameInput.value=item.dataset.name; autoList.style.display='none'; };
+    item.addEventListener('mousedown', e => { e.preventDefault(); pick(); });
+    item.addEventListener('touchstart', e => { pick(); }, {passive:true});
+  });
+}
+
+nameInput.addEventListener('input', () => showDropdown(nameInput.value));
+nameInput.addEventListener('blur',  () => setTimeout(() => autoList.style.display='none', 150));
+nameInput.addEventListener('keydown', e => { if (e.key==='Enter') showWish(); });
+document.getElementById('btnWish').addEventListener('click', showWish);
+document.getElementById('btnBack').addEventListener('click', () => {
+  wishScreen.classList.remove('show');
+  wishScreen.scrollTop = 0;
+  nameInput.value = '';
+});
+
+function makePlaceholderSrc(idx) {
+  const [c1, c2] = placeholderColors[idx % placeholderColors.length];
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'>
+    <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+      <stop offset='0%' stop-color='${c1}'/><stop offset='100%' stop-color='${c2}'/>
+    </linearGradient></defs>
+    <rect width='300' height='300' fill='url(%23g)'/>
+    <text x='150' y='170' font-size='100' text-anchor='middle' font-family='serif'>🌸</text>
+  </svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + svg;
+}
+
+function showWish() {
+  const val = nameInput.value.trim();
+  if (!val) return;
+  const idx   = girls.findIndex(g => normalize(g.name) === normalize(val));
+  const found = idx >= 0 ? girls[idx] : null;
+  const displayName = found ? found.name : val;
+  const wish   = found ? found.wish : GENERAL_WISH;
+  const fi     = found ? idx % flowers.length : 0;
+  const flower = flowers[fi];
+  const icon   = wishIcons[fi % wishIcons.length];
+  const emojis = emojiSets[fi % emojiSets.length];
+  const photoSrc = (found && found.photo) ? found.photo : makePlaceholderSrc(found ? idx : 0);
+
+  wsFlower.textContent   = flower;
+  wsName.textContent     = displayName;
+  wsPhoto.src            = photoSrc;
+  wsPhotoName.textContent= displayName;
+  wsWishText.textContent = wish;
+  wsWishIcon.textContent = icon;
+
+  // Sticker polaroid theo flower
+  const stickerSets = [
+    ["🌸","✨"],["🌺","💖"],["🌷","🌿"],["💐","💫"],
+    ["🌼","🦋"],["🌹","⭐"],["🪷","🍃"],["🌻","💕"],
+  ];
+  const ss = stickerSets[fi % stickerSets.length];
+  const s1 = document.getElementById('wsSticker1');
+  const s2 = document.getElementById('wsSticker2');
+  if (s1) { s1.textContent = ss[0]; s1.style.animation='none'; void s1.offsetWidth; s1.style.animation=''; }
+  if (s2) { s2.textContent = ss[1]; s2.style.animation='none'; void s2.offsetWidth; s2.style.animation=''; }
+
+  ['cE1','cE2','cE3','cE4'].forEach((id,i) => {
+    document.getElementById(id).textContent = emojis[i];
+  });
+
+  // Reset corner animations
+  wishScreen.querySelectorAll('.c-corner, .c-emoji').forEach(el => {
+    el.style.animation='none'; void el.offsetWidth; el.style.animation='';
+  });
+
+  // Ẩn trước, scroll về đầu, rồi mới show để luôn bắt đầu ở màn 1
+  wishScreen.classList.remove('show');
+  void wishScreen.offsetWidth;
+  wishScreen.classList.add('show');
+  // Dùng setTimeout để chắc chắn DOM đã render xong rồi mới scroll
+  requestAnimationFrame(() => {
+    wishScreen.scrollTop = 0;
+  });
+
+  setTimeout(() => {
+    for (let i=0;i<3;i++) setTimeout(() => spawnParticles(innerWidth/2, innerHeight/2), i*200);
+  }, 400);
+}
+
+// ─── TOUCH PARTICLES ───
+const pEmojis = ["🌸","🌺","🌷","💖","💕","✨","🌹","💗","⭐","🦋","🌼","💫","🪷","💝"];
+const sCols   = ["#f5d0dc","#e8a0b0","#fde8ef","#d4a96a","#c8dbc2","#ffb3c6","#fff0a0"];
+
+function spawnParticles(x,y) {
+  const rip=document.createElement('div');
+  rip.className='touch-ripple'; rip.style.left=x+'px'; rip.style.top=y+'px';
+  document.body.appendChild(rip); setTimeout(()=>rip.remove(),700);
+  const cnt=5+Math.floor(Math.random()*3);
+  for(let i=0;i<cnt;i++){
+    const el=document.createElement('div');
+    el.className='touch-particle emoji';
+    el.textContent=pEmojis[Math.floor(Math.random()*pEmojis.length)];
+    const a=(Math.PI*2/cnt)*i+(Math.random()-.5)*.8;
+    const d1=40+Math.random()*40, d2=70+Math.random()*60;
+    const dur=(0.7+Math.random()*.5).toFixed(2)+'s';
+    el.style.cssText=`left:${x}px;top:${y}px;--tx:${Math.cos(a)*d1}px;--ty1:${Math.sin(a)*d1-20}px;--tx2:${Math.cos(a)*d2}px;--ty2:${Math.sin(a)*d2+20}px;--rot:${(Math.random()-.5)*90}deg;--rot2:${(Math.random()-.5)*180}deg;--dur:${dur};animation-delay:${i*.04}s`;
+    document.body.appendChild(el); setTimeout(()=>el.remove(),1200);
+  }
+  for(let i=0;i<8;i++){
+    const el=document.createElement('div'); el.className='touch-particle star';
+    const a=Math.random()*Math.PI*2, d1=20+Math.random()*30, d2=50+Math.random()*50;
+    const dur=(0.5+Math.random()*.4).toFixed(2)+'s';
+    el.style.cssText=`left:${x}px;top:${y}px;--tx:${Math.cos(a)*d1}px;--ty1:${Math.sin(a)*d1}px;--tx2:${Math.cos(a)*d2}px;--ty2:${Math.sin(a)*d2}px;--sz:${(4+Math.random()*6).toFixed(1)}px;--col:${sCols[Math.floor(Math.random()*sCols.length)]};--dur:${dur};animation-delay:${i*.03}s`;
+    document.body.appendChild(el); setTimeout(()=>el.remove(),1000);
+  }
+}
+document.addEventListener('touchstart', e => { for(const t of e.touches) spawnParticles(t.clientX,t.clientY); }, {passive:true});
+document.addEventListener('click', e => spawnParticles(e.clientX,e.clientY));
+
+// ─── FALLING PETALS ───
+const canvas=document.getElementById('petalCanvas');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+resize(); window.addEventListener('resize',resize);
+const PC=['#f5d0dc','#e8a0b0','#fde8ef','#c8dbc2','#f9c5d1','#ffb3c6','#ffdde8'];
+const petals=Array.from({length:55},()=>mkPetal());
+function mkPetal(t=false){
+  return {x:Math.random()*(W||800),y:t?-20:Math.random()*(H||600),r:5+Math.random()*9,
+    color:PC[Math.floor(Math.random()*PC.length)],speedY:.6+Math.random()*1.2,
+    speedX:(Math.random()-.5)*.7,angle:Math.random()*Math.PI*2,spin:(Math.random()-.5)*.04,
+    sway:Math.random()*.03,swayOffset:Math.random()*Math.PI*2,opacity:.5+Math.random()*.4,t:0};
+}
+function drawPetal(p){
+  ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.angle);
+  ctx.globalAlpha=p.opacity; ctx.fillStyle=p.color;
+  ctx.beginPath(); ctx.ellipse(0,0,p.r,p.r*1.7,0,0,Math.PI*2); ctx.fill(); ctx.restore();
+}
+(function loop(){
+  ctx.clearRect(0,0,W,H);
+  petals.forEach(p=>{
+    p.t+=.01; p.x+=p.speedX+Math.sin(p.t+p.swayOffset)*p.sway*15;
+    p.y+=p.speedY; p.angle+=p.spin;
+    if(p.y>H+20) Object.assign(p,mkPetal(true));
+    drawPetal(p);
+  });
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
