@@ -564,6 +564,9 @@ function showWish() {
   wsFlower.textContent   = flower;
   wsName.textContent     = displayName;
   wsPhoto.src            = photoSrc;
+  // Preload ảnh trước khi hiện màn 2
+const preloadImg = new Image();
+preloadImg.src = photoSrc;
   wsPhotoName.textContent= displayName;
   wsWishText.textContent = wish;
   wsWishIcon.textContent = icon;
