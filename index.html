@@ -567,11 +567,47 @@ function showWish() {
   wsWishText.textContent  = wish;
   wsWishIcon.textContent  = icon;
 
-  // Preload ảnh TRƯỚC rồi mới gán vào khung
+  // Preload xong mới mở màn hình
   const preloadImg = new Image();
-  preloadImg.onload = () => { wsPhoto.src = photoSrc; };
-  preloadImg.onerror = () => { wsPhoto.src = photoSrc; }; // vẫn hiện dù lỗi
+  preloadImg.onload = () => {
+    wsPhoto.src = photoSrc;
+    openWishScreen(emojis, fi);
+  };
+  preloadImg.onerror = () => {
+    wsPhoto.src = photoSrc;
+    openWishScreen(emojis, fi); // vẫn mở dù ảnh lỗi
+  };
   preloadImg.src = photoSrc;
+}
+
+function openWishScreen(emojis, fi) {
+  const stickerSets = [
+    ["🌸","✨"],["🌺","💖"],["🌷","🌿"],["💐","💫"],
+    ["🌼","🦋"],["🌹","⭐"],["🪷","🍃"],["🌻","💕"],
+  ];
+  const ss = stickerSets[fi % stickerSets.length];
+  const s1 = document.getElementById('wsSticker1');
+  const s2 = document.getElementById('wsSticker2');
+  if (s1) { s1.textContent=ss[0]; s1.style.animation='none'; void s1.offsetWidth; s1.style.animation=''; }
+  if (s2) { s2.textContent=ss[1]; s2.style.animation='none'; void s2.offsetWidth; s2.style.animation=''; }
+
+  ['cE1','cE2','cE3','cE4'].forEach((id,i) => {
+    document.getElementById(id).textContent = emojis[i];
+  });
+
+  wishScreen.querySelectorAll('.c-corner, .c-emoji').forEach(el => {
+    el.style.animation='none'; void el.offsetWidth; el.style.animation='';
+  });
+
+  wishScreen.classList.remove('show');
+  void wishScreen.offsetWidth;
+  wishScreen.classList.add('show');
+  requestAnimationFrame(() => { wishScreen.scrollTop = 0; });
+
+  setTimeout(() => {
+    for(let i=0;i<3;i++) setTimeout(() => spawnParticles(innerWidth/2, innerHeight/2), i*200);
+  }, 400);
+}
   // Sticker polaroid theo flower
   const stickerSets = [
     ["🌸","✨"],["🌺","💖"],["🌷","🌿"],["💐","💫"],
