@@ -564,10 +564,6 @@ function showWish() {
 
   wsFlower.textContent   = flower;
   wsName.textContent     = displayName;
-  wsPhoto.src            = photoSrc;
-  // Preload ảnh trước khi hiện màn 2
-const preloadImg = new Image();
-preloadImg.src = photoSrc;
   wsPhotoName.textContent= displayName;
   wsWishText.textContent = wish;
   wsWishIcon.textContent = icon;
@@ -592,20 +588,34 @@ preloadImg.src = photoSrc;
     el.style.animation='none'; void el.offsetWidth; el.style.animation='';
   });
 
-  // Ẩn trước, scroll về đầu, rồi mới show để luôn bắt đầu ở màn 1
-  wishScreen.classList.remove('show');
-  void wishScreen.offsetWidth;
-  wishScreen.classList.add('show');
-  // Dùng setTimeout để chắc chắn DOM đã render xong rồi mới scroll
-  requestAnimationFrame(() => {
-    wishScreen.scrollTop = 0;
-  });
-
-  setTimeout(() => {
-    for (let i=0;i<3;i++) setTimeout(() => spawnParticles(innerWidth/2, innerHeight/2), i*200);
-  }, 400);
+  // Preload ảnh trước, rồi mới show màn hình
+  const preloadImg = new Image();
+  preloadImg.onload = () => {
+    wsPhoto.src = photoSrc;
+    wishScreen.classList.remove('show');
+    void wishScreen.offsetWidth;
+    wishScreen.classList.add('show');
+    requestAnimationFrame(() => {
+      wishScreen.scrollTop = 0;
+    });
+    setTimeout(() => {
+      for (let i=0;i<3;i++) setTimeout(() => spawnParticles(innerWidth/2, innerHeight/2), i*200);
+    }, 400);
+  };
+  preloadImg.onerror = () => {
+    wsPhoto.src = makePlaceholderSrc(found ? idx : 0);
+    wishScreen.classList.remove('show');
+    void wishScreen.offsetWidth;
+    wishScreen.classList.add('show');
+    requestAnimationFrame(() => {
+      wishScreen.scrollTop = 0;
+    });
+    setTimeout(() => {
+      for (let i=0;i<3;i++) setTimeout(() => spawnParticles(innerWidth/2, innerHeight/2), i*200);
+    }, 400);
+  };
+  preloadImg.src = photoSrc;
 }
-
 // ─── TOUCH PARTICLES ───
 const pEmojis = ["🌸","🌺","🌷","💖","💕","✨","🌹","💗","⭐","🦋","🌼","💫","🪷","💝"];
 const sCols   = ["#f5d0dc","#e8a0b0","#fde8ef","#d4a96a","#c8dbc2","#ffb3c6","#fff0a0"];
