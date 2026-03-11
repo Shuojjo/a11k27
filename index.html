@@ -561,16 +561,17 @@ function showWish() {
   const emojis = emojiSets[fi % emojiSets.length];
   const photoSrc = (found && found.photo) ? found.photo : makePlaceholderSrc(found ? idx : 0);
 
-  wsFlower.textContent   = flower;
-  wsName.textContent     = displayName;
-  wsPhoto.src            = photoSrc;
-  // Preload ảnh trước khi hiện màn 2
-const preloadImg = new Image();
-preloadImg.src = photoSrc;
-  wsPhotoName.textContent= displayName;
-  wsWishText.textContent = wish;
-  wsWishIcon.textContent = icon;
+  wsFlower.textContent    = flower;
+  wsName.textContent      = displayName;
+  wsPhotoName.textContent = displayName;
+  wsWishText.textContent  = wish;
+  wsWishIcon.textContent  = icon;
 
+  // Preload ảnh TRƯỚC rồi mới gán vào khung
+  const preloadImg = new Image();
+  preloadImg.onload = () => { wsPhoto.src = photoSrc; };
+  preloadImg.onerror = () => { wsPhoto.src = photoSrc; }; // vẫn hiện dù lỗi
+  preloadImg.src = photoSrc;
   // Sticker polaroid theo flower
   const stickerSets = [
     ["🌸","✨"],["🌺","💖"],["🌷","🌿"],["💐","💫"],
